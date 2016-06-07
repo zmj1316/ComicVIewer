@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">ComicViewer</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+    <string name="user_agent">Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.103 Safari/537.36</string>
+    <string name="NAV_URL">http://www.1kkk.com/manhua-new-p</string>
+</resources>
