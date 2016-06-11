@@ -1,6 +1,7 @@
 package tk.zmj1316.comicviewer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import tk.zmj1316.ComicParser.Book;
+import tk.zmj1316.ComicParser.Chapter;
 import tk.zmj1316.ComicParser.Util;
 
 /**
@@ -22,12 +24,19 @@ import tk.zmj1316.ComicParser.Util;
  */
 public class BookViewCardAdapter extends RecyclerView.Adapter<SimpleCardViewHolder> {
     private Context mContext;
-    private List<Book> mList = new ArrayList<>(0);
+    private List<Book.BookThumb> mList = new ArrayList<>(0);
     private int mCount = 0;
     private LayoutInflater mInflater;
     private final String mURL;
     private int mPageNumber = 1;
     private SwipeRefreshLayout mSwipeRefreshLayout;
+
+
+    public interface OnItemClickLitener {
+        void onItemClick(View view, int position);
+    }
+
+    private OnItemClickLitener mOnItemClickLitener;
 
     public BookViewCardAdapter(final Context mContext, String mURL, SwipeRefreshLayout mSwipeRefreshLayout) {
         this.mContext = mContext;
@@ -38,9 +47,13 @@ public class BookViewCardAdapter extends RecyclerView.Adapter<SimpleCardViewHold
     }
 
     class AsyncParser extends AsyncTask<String, Integer, String> {
+        private int before = 0;
+        private int after = 0;
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            before = mList.size();
             mSwipeRefreshLayout.setRefreshing(true);
         }
 
@@ -52,13 +65,14 @@ public class BookViewCardAdapter extends RecyclerView.Adapter<SimpleCardViewHold
                 mList.addAll(Book.parse(mURL, mPageNumber++));
             }
             mCount = mList.size();
+            after = mList.size();
             return null;
         }
 
         @Override
         protected void onPostExecute(String s) {
             mSwipeRefreshLayout.setRefreshing(false);
-            notifyDataSetChanged();
+            notifyItemRangeChanged(before, after);
         }
     }
 
@@ -70,7 +84,7 @@ public class BookViewCardAdapter extends RecyclerView.Adapter<SimpleCardViewHold
     }
 
     @Override
-    public void onBindViewHolder(final SimpleCardViewHolder holder, int position) {
+    public void onBindViewHolder(final SimpleCardViewHolder holder, final int position) {
         holder.itemTv.setText(mList.get(position).title);
         final String thumb = mList.get(position).Thumb;
         class Download extends AsyncTask<String, Integer, Bitmap> {
@@ -88,11 +102,23 @@ public class BookViewCardAdapter extends RecyclerView.Adapter<SimpleCardViewHold
                     if (holder.itemIv.getTag().equals(thumb)) {
                         holder.itemIv.setImageBitmap(s);
                     } else {
-//                        holder.itemIv.setImageDrawable(null);
+                        holder.itemIv.setImageDrawable(null);
                     }
                 }
             }
         }
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Book.BookThumb bookThumb = mList.get(position);
+                Intent intent = new Intent(mContext, BookScrollingActivity.class);
+                intent.putExtra(BookScrollingActivity.CHAPTER_URL, bookThumb.URL);
+                intent.putExtra(BookScrollingActivity.CHAPTER_TITLE, bookThumb.title);
+                intent.putExtra(BookScrollingActivity.CHAPTER_THUMB, bookThumb.Thumb);
+                mContext.startActivity(intent);
+            }
+
+        });
         holder.itemIv.setTag(thumb);
         new Download().execute(thumb);
     }
@@ -103,15 +129,21 @@ public class BookViewCardAdapter extends RecyclerView.Adapter<SimpleCardViewHold
     }
 
     public void refresh() {
+        if (mSwipeRefreshLayout.isRefreshing()) {
+            return;
+        }
         mPageNumber = 1;
         new AsyncParser().execute();
-        notifyDataSetChanged();
+//        notifyDataSetChanged();
     }
 
     // Add a list of items
     public void loadMoreList() {
+        if (mSwipeRefreshLayout.isRefreshing()) {
+            return;
+        }
         new AsyncParser().execute();
-        notifyDataSetChanged();
+//        notifyDataSetChanged();
     }
 
 }

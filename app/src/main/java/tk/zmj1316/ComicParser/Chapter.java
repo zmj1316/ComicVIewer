@@ -16,11 +16,12 @@ public class Chapter {
     public String id;
     public String ch_str;
     public int page_count;
-
-    public Chapter(String ch_str) {
+    public String title;
+    public Chapter(String ch_str, String title) {
         this.ch_str = ch_str;
         this.page_count = Get_Ch_Range(ch_str);
         this.id = Extract_Ch_id(ch_str);
+        this.title = title;
     }
 
     /**

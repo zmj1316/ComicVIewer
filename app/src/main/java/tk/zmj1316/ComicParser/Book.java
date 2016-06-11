@@ -19,23 +19,17 @@ public class Book {
     public List<Chapter> mAllChapters;
     public List<Chapter> mNewChapters = new ArrayList<Chapter>();
 
-    public int chapterCount;
+    public int chapterCount = 0;
     public boolean Large = false;
 
     private Document doc;
 
-    public Book(String title, String URL, int chapterCount) {
-        this.title = title;
-        this.URL = URL;
-        this.mAllChapters = new ArrayList<Chapter>();
-        this.chapterCount = chapterCount;
-    }
 
     public Book(String URL) {
-        this.URL = URL;
+        this.URL = Util.Domain + URL;
 
         try {
-            doc = Jsoup.connect(URL)
+            doc = Jsoup.connect(this.URL)
                     .userAgent(Util.UserAgent)
                     .timeout(3000)
                     .get();
@@ -43,6 +37,7 @@ public class Book {
             title = e.getElementsByTag("h1").get(0).text();
             Element t = doc.getElementsByAttributeValue("class", "sy_k1 z").get(0);
             Thumb = t.getElementsByTag("img").get(0).attr("src");
+            parseChapters();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -51,23 +46,36 @@ public class Book {
     public void parseChapters() {
         Elements chapterLists = doc.getElementsByAttributeValue("class", "sy_nr1 cplist_ullg");
         Element newChapterList = chapterLists.get(0);
+
         for (Element i : newChapterList.getElementsByTag("a")
                 ) {
-            mNewChapters.add(new Chapter(i.attr("href")));
+            mNewChapters.add(new Chapter(i.attr("href"), i.text()));
         }
         if (chapterLists.size() > 1) {
             Large = true;
             Element allChapterList = chapterLists.get(1);
-            mAllChapters = new ArrayList<Chapter>(10);
+            mAllChapters = new ArrayList<>(10);
             for (Element i : allChapterList.getElementsByTag("a")
                     ) {
-                mAllChapters.add(new Chapter(i.attr("href")));
+                mAllChapters.add(new Chapter(i.attr("href"), i.text()));
             }
         }
     }
 
-    static public List<Book> parse(String url, int pageNumber) {
-        List<Book> result = new ArrayList<>(24);
+    static public class BookThumb {
+        public final String Thumb;
+        public final String URL;
+        public final String title;
+
+        public BookThumb(String thumb, String url, String title) {
+            this.Thumb = thumb;
+            URL = url;
+            this.title = title;
+        }
+    }
+
+    static public List<BookThumb> parse(String url, int pageNumber) {
+        List<BookThumb> result = new ArrayList<>(24);
         try {
             Document doc = Jsoup.connect(url + pageNumber + "/")
                     .userAgent(Util.UserAgent)
@@ -76,7 +84,13 @@ public class Book {
             Element main = doc.getElementsByClass("in_01").get(0);
             for (Element i : main.getElementsByTag("li")
                     ) {
-                result.add(new Book(Util.Domain + i.getElementsByTag("a").get(0).attr("href")));
+                String href = i.getElementsByTag("a").get(0).attr("href");
+                String thumb = i.getElementsByTag("a").get(0).getElementsByTag("img").get(0).attr("src");
+                String title = i.getElementsByTag("a").text();
+                int firstMark = title.indexOf("[");
+                if (firstMark > 0)
+                    title = title.substring(0, firstMark - 1);
+                result.add(new BookThumb(thumb, href, title));
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -46,7 +46,7 @@ public class Page {
         Request request = new Request.Builder()
                 .url(URL)
                 .addHeader("userAgent", Util.UserAgent)
-                .addHeader("referer", Referer)
+                .addHeader("referer", referer)
                 .build();
         try {
             Response res = okHttpClient.newCall(request).execute();

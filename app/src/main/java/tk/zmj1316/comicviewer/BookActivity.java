@@ -18,9 +18,9 @@ import android.view.MenuItem;
 import java.io.File;
 import java.io.IOException;
 
-public class MainActivity extends AppCompatActivity
+public class BookActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
+    private static int mURLId = R.string.MANHUA_new;
     private RecyclerView mRecycleView;
     private BookViewCardAdapter mBookViewCardAdapter;
 
@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity
 
         try {
             File httpCacheDir = new File(this.getCacheDir(), "http");
-            long httpCacheSize = 20 * 1024 * 1024; // 10 MiB
+            long httpCacheSize = 200 * 1024 * 1024; // 200 MiB
             HttpResponseCache.install(httpCacheDir, httpCacheSize);
         } catch (IOException e) {
             e.printStackTrace();
@@ -64,7 +64,8 @@ public class MainActivity extends AppCompatActivity
 
         mRecycleView = (RecyclerView) findViewById(R.id.recycleview);
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
-        mBookViewCardAdapter = new BookViewCardAdapter(this, this.getResources().getString(R.string.NAV_URL), mSwipeRefreshLayout);
+        mSwipeRefreshLayout.setRefreshing(true);
+        mBookViewCardAdapter = new BookViewCardAdapter(this, this.getResources().getString(mURLId), mSwipeRefreshLayout);
         mSwipeRefreshLayout.setProgressViewOffset(false, 0, (int) TypedValue
                 .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources()
                         .getDisplayMetrics()));
@@ -126,12 +127,12 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
+        if (id == R.id.new_comic) {
+            this.mURLId = R.string.MANHUA_new;
+        } else if (id == R.id.jpkr_comic) {
+            this.mURLId = R.string.MANHUA_jpkr;
+        } else if (id == R.id.euus_comic) {
+            this.mURLId = R.string.MANHUA_euus;
         } else if (id == R.id.nav_manage) {
 
         } else if (id == R.id.nav_share) {
@@ -139,9 +140,10 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_send) {
 
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
+        finish();
+        startActivity(getIntent());
         return true;
     }
 }

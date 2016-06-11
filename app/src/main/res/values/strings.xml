@@ -7,5 +7,9 @@
     <string name="action_settings">Settings</string>
 
     <string name="user_agent">Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.103 Safari/537.36</string>
-    <string name="NAV_URL">http://www.1kkk.com/manhua-new-p</string>
+    <string name="MANHUA_new">http://www.1kkk.com/manhua-new-p</string>
+    <string name="MANHUA_jpkr">http://www.1kkk.com/manhua-jpkr-p</string>
+    <string name="MANHUA_euus">http://www.1kkk.com/manhua-euus-p</string>
+    <string name="title_activity_book_scrolling">BookScrollingActivity</string>
+    <string name="title_activity_gallery">GalleryActivity</string>
 </resources>
